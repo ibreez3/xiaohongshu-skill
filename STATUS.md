@@ -1,5 +1,13 @@
 # OpenClaw 小红书 Skill - 快速参考
 
+## ⚠️ 重要说明
+
+**OpenClaw Skills 不是通过 `/命令` 调用的！**
+
+Skills 是通过 **AI 对话自动识别并调用**的工具函数。
+
+---
+
 ## ✅ 当前状态
 
 ### 服务状态
@@ -7,26 +15,50 @@
 - ✅ **MCP 连接**: 已连接 (13个工具)
 - ✅ **登录状态**: 已登录
 - ✅ **Skill 安装**: ~/.openclaw/workspace/skills/xiaohongshu-auto-publish/
-
-### 待验证
-- ⏳ OpenClaw 是否识别 Skill
-- ⏳ 命令是否可用
+- ✅ **配置已添加**: skills.entries.xiaohongshu
 
 ---
 
-## 🚀 快速开始
+## 🚀 正确使用方法
 
-### 在 OpenClaw 中使用
+### 在 OpenClaw 对话中使用
 
-**方式 1: 直接命令**
+**检查登录状态**：
 ```
-/check-login
+请帮我检查小红书的登录状态
 ```
 
-**方式 2: 自然语言**
+**获取首页内容**：
 ```
-"帮我检查小红书登录状态"
+获取小红书首页推荐列表
 ```
+
+**搜索内容**：
+```
+帮我搜索小红书上关于"咖啡店"的内容
+```
+
+**发布内容**：
+```
+请帮我发布一篇小红书，标题是"春天的美食"，内容是"推荐几家好吃的餐厅"，使用图片 /path/to/food.jpg
+```
+
+---
+
+## 🔧 可用工具
+
+AI 可以调用以下工具：
+
+- `check_login_status` - 检查登录状态
+- `get_login_qrcode` - 获取登录二维码
+- `list_feeds` - 获取首页列表
+- `search_feeds` - 搜索内容
+- `publish_content` - 发布图文
+- `publish_with_video` - 发布视频
+- `get_feed_detail` - 获取笔记详情
+- `post_comment_to_feed` - 发表评论
+- `like_feed` - 点赞
+- `favorite_feed` - 收藏
 
 ---
 
