@@ -3,6 +3,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Claude Code Skill](https://img.shields.io/badge/Claude%20Code-Skill-blue)](https://claude.ai/)
 
+> **⚠️ 重要提示**: OpenClaw 不支持 SSE MCP 传输，无法直接使用 xiaohongshu-mcp。请使用 [Cursor](https://cursor.sh/)、[Claude Code](https://claude.ai/code) 或其他支持 MCP 的客户端。详见 [OpenClaw MCP 问题说明](OPENCRAW_MCP_ISSUE.md)。
+
 A powerful Claude Code Skill plugin for automating content publishing to Xiaohongshu (Little Red Book) via the [xiaohongshu-mcp](https://github.com/xpzouying/xiaohongshu-mcp) server.
 
 ## Features
@@ -19,9 +21,76 @@ A powerful Claude Code Skill plugin for automating content publishing to Xiaohon
 
 ## Requirements
 
+### MCP Server
 - [xiaohongshu-mcp](https://github.com/xpzouying/xiaohongshu-mcp) server running locally or remotely
 - Node.js 18+ (for running the publish scripts)
-- Claude Code IDE
+
+### MCP Client (Choose One)
+
+#### ✅ Compatible Clients
+- **[Cursor](https://cursor.sh/)** (Recommended) - Full MCP support with SSE transport
+- **[Claude Code](https://claude.ai/code)** - Official CLI with MCP support
+- **[Cline](https://cline.dev/)** - AI assistant with MCP integration
+- **[VSCode](https://code.visualstudio.com/)** - With MCP extension
+
+#### ❌ Incompatible
+- **OpenClaw** - Does not support SSE MCP transport (see [OPENCRAW_MCP_ISSUE.md](OPENCRAW_MCP_ISSUE.md) for details)
+
+### Why OpenClaw Doesn't Work
+
+xiaohongshu-mcp uses **SSE (Server-Sent Events)** for MCP transport, which requires:
+1. Persistent HTTP connections
+2. Server-to-client event streaming
+3. Session state management
+
+OpenClaw's Skill system uses simple function calls and cannot maintain SSE connections.
+
+**Solution**: Use Cursor, Claude Code, or other MCP-compatible clients instead.
+
+## Quick Start (Recommended Clients)
+
+### Using Cursor (Recommended)
+
+1. **Install Cursor**: https://cursor.sh/
+
+2. **Create MCP config** (`.cursor/mcp.json`):
+   ```json
+   {
+     "mcpServers": {
+       "xiaohongshu-mcp": {
+         "url": "http://localhost:18060/mcp",
+         "description": "小红书 MCP 服务"
+       }
+     }
+   }
+   ```
+
+3. **Start xiaohongshu-mcp**:
+   ```bash
+   cd /path/to/xiaohongshu-mcp
+   npm start
+   ```
+
+4. **Restart Cursor** and start publishing!
+
+### Using Claude Code CLI
+
+```bash
+# Add MCP server
+claude mcp add --transport http xiaohongshu-mcp http://localhost:18060/mcp
+
+# Verify connection
+claude mcp list
+```
+
+### Using MCP Inspector (for testing)
+
+```bash
+npx @modelcontextprotocol/inspector
+# Open browser and connect to: http://localhost:18060/mcp
+```
+
+---
 
 ## Prerequisites
 
