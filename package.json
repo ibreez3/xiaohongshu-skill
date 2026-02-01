@@ -1,0 +1,14 @@
+{
+  "name": "xiaohongshu-auto-publish",
+  "version": "1.0.0",
+  "description": "小红书自动发稿 Skill - 支持发布图文/视频、搜索内容、获取详情、发表评论等功能",
+  "main": "index.js",
+  "type": "module",
+  "author": "xiaohongshu-skill",
+  "license": "MIT",
+  "openclaw": {
+    "type": "skill",
+    "id": "xiaohongshu-auto-publish"
+  },
+  "dependencies": {}
+}

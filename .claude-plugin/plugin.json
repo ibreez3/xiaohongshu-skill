@@ -1,0 +1,9 @@
+{
+  "name": "xiaohongshu-skill",
+  "description": "Xiaohongshu (Little Red Book) auto-publishing skill - publish image/text and video content via xiaohongshu-mcp",
+  "version": "0.0.1",
+  "author": {
+    "name": "xiaohongshu-skill",
+    "email": "noreply@example.com"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "entry": "index.js",
+  "id": "xiaohongshu-auto-publish",
+  "name": "小红书自动发稿",
+  "version": "1.0.0",
+  "type": "skill",
+  "author": "xiaohongshu-skill",
+  "description": "小红书自动发稿 Skill - 支持发布图文/视频、搜索内容、获取详情、发表评论等功能",
+  "openclaw": {
+    "type": "skill",
+    "entry": "xiaohongshu-auto-publish"
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "mcpUrl": {
+        "type": "string",
+        "description": "小红书 MCP 服务器地址",
+        "default": "http://127.0.0.1:18060/mcp"
+      }
+    }
+  }
+}
