@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Logs
+logs/
+*.log
+adapter.log
+
+# Runtime
+adapter.pid
+
+# Test files
+test-mcp-simple.js
+test-delay.js
+test-notify-variants.js
+test-ping-init.js
+test-mcp-client.js.bak
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary
+*.tmp
+temp/

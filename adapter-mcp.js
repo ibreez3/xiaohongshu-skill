@@ -8,10 +8,9 @@
  */
 
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { HttpClient } from '@modelcontextprotocol/sdk/client/http.js';
+import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import express from 'express';
 import cors from 'cors';
-import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 
 const MCP_SERVER = process.env.XIAOHONGSHU_MCP_URL || 'http://127.0.0.1:18060/mcp';
 const API_PORT = process.env.API_PORT || 3000;
@@ -42,7 +41,7 @@ class McpAdapter {
         capabilities: {}
       });
 
-      const transport = new HttpClient(MCP_SERVER);
+      const transport = new StreamableHTTPClientTransport(MCP_SERVER);
 
       await this.client.connect(transport);
 
