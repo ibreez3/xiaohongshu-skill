@@ -46,16 +46,11 @@ export default {
     console.log('[OpenClaw Skill] 小红书 Skill 正在加载...');
     console.log(`[OpenClaw Skill] API 地址: ${API_BASE}`);
 
-    try {
-      // 检查 API 健康状态
-      const health = await callApi('/health');
-      console.log('[OpenClaw Skill] ✅ API 连接成功');
-      console.log('[OpenClaw Skill] MCP 状态:', health.mcp);
-      console.log('[OpenClaw Skill] 可用工具:', health.tools);
-    } catch (error) {
-      console.error('[OpenClaw Skill] ⚠️ API 连接失败:', error.message);
-      console.error('[OpenClaw Skill] 请确保适配器服务器正在运行: node adapter-server.js');
-    }
+    // 注意：不要在 onLoad 中进行同步的网络请求，会阻塞 Skill 加载
+    // 健康检查将在第一次调用工具时自动进行
+
+    console.log('[OpenClaw Skill] ✅ Skill 加载完成');
+    console.log('[OpenClaw Skill] 首次调用工具时会自动检查 API 连接');
   },
 
   /**

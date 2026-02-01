@@ -85,7 +85,22 @@ OpenClaw → HTTP API (localhost:3000) → 适配器 → SSE MCP → xiaohongshu
 
 ---
 
-## 🔍 故障排查
+## 🔧 故障排查
+
+### 问题: Skill 加载卡住
+
+**症状**: OpenClaw 加载 Skill 时一直转圈或卡住
+
+**原因**: 已修复 ✅ - 移除了 `onLoad()` 中的网络请求
+
+**解决**:
+1. 代码已更新并同步到安装目录
+2. 完全重启 OpenClaw 应用
+3. Skill 应该能快速加载
+
+---
+
+## 其他故障排查
 
 ### 如果命令不工作
 
