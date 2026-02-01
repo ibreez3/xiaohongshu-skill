@@ -1,28 +1,61 @@
 # Xiaohongshu Auto-Publish Skill
 
-A Claude Code Skill plugin for publishing content to Xiaohongshu (Little Red Book) via the xiaohongshu-mcp server.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Claude Code Skill](https://img.shields.io/badge/Claude%20Code-Skill-blue)](https://claude.ai/)
+
+A powerful Claude Code Skill plugin for automating content publishing to Xiaohongshu (Little Red Book) via the [xiaohongshu-mcp](https://github.com/xpzouying/xiaohongshu-mcp) server.
 
 ## Features
 
 - Publish image/text content to Xiaohongshu
 - Publish video content to Xiaohongshu
-- Check login status
-- Get login QR code
+- Check login status and get QR code
 - Search for content on Xiaohongshu
-- Get detailed information about a feed
+- Get detailed information about feeds
 - Post comments to feeds
 - List feeds from homepage
+- Like and favorite feeds
+- Get user profile information
 
 ## Requirements
 
-- xiaohongshu-mcp server running on `http://127.0.0.1:18060/mcp`
-- Node.js (for running the publish scripts)
+- [xiaohongshu-mcp](https://github.com/xpzouying/xiaohongshu-mcp) server running locally or remotely
+- Node.js 18+ (for running the publish scripts)
+- Claude Code IDE
+
+## Prerequisites
+
+Before using this skill, you need to deploy and run the [xiaohongshu-mcp](https://github.com/xpzouying/xiaohongshu-mcp) server:
+
+1. Clone the xiaohongshu-mcp repository:
+   ```bash
+   git clone https://github.com/xpzouying/xiaohongshu-mcp.git
+   cd xiaohongshu-mcp
+   ```
+
+2. Install dependencies and start the server:
+   ```bash
+   npm install
+   npm start
+   ```
+
+3. By default, the MCP server will run on `http://127.0.0.1:18060/mcp`
+
+This Skill depends on the xiaohongshu-mcp server for all operations. Special thanks to [xpzouying](https://github.com/xpzouying) for developing the xiaohongshu-mcp project, which made this Skill possible.
 
 ## Installation
 
-1. Clone or copy this plugin to your Claude plugins directory
-2. Ensure xiaohongshu-mcp server is running
-3. Restart Claude Code
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/yourusername/xiaohongshu-skill.git
+   cd xiaohongshu-skill
+   ```
+
+2. Ensure xiaohongshu-mcp server is running (see Prerequisites)
+
+3. Install this plugin in your Claude Code plugins directory
+
+4. Restart Claude Code
 
 ## Usage
 
@@ -33,7 +66,7 @@ A Claude Code Skill plugin for publishing content to Xiaohongshu (Little Red Boo
 ```
 
 This will:
-- Check if you're logged in
+- Check if you're logged in to Xiaohongshu
 - Display QR code if not logged in
 - Save QR code to `/tmp/xiaohongshu_qrcode.png`
 
@@ -148,6 +181,34 @@ curl http://127.0.0.1:18060/mcp
 
 Ensure all image and video paths are absolute paths (start with `/`).
 
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## Acknowledgments
+
+This project would not have been possible without the excellent work of [xiaohongshu-mcp](https://github.com/xpzouying/xiaohongshu-mcp) by [xpzouying](https://github.com/xpzouying). Thank you for providing the MCP server that powers this Skill!
+
+Special thanks to the entire open source community for their contributions and support.
+
 ## License
 
-MIT
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Disclaimer
+
+This project is for educational purposes only. Please comply with Xiaohongshu's terms of service and use this tool responsibly.
+
+## Star History
+
+If you find this project helpful, please consider giving it a star! ⭐
+
+---
+
+Made with ❤️ for the Claude Code community
