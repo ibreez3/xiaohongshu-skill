@@ -3,9 +3,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Claude Code Skill](https://img.shields.io/badge/Claude%20Code-Skill-blue)](https://claude.ai/)
 
-> **⚠️ 重要提示**: OpenClaw 不支持 SSE MCP 传输，无法直接使用 xiaohongshu-mcp。请使用 [Cursor](https://cursor.sh/)、[Claude Code](https://claude.ai/code) 或其他支持 MCP 的客户端。详见 [OpenClaw MCP 问题说明](OPENCRAW_MCP_ISSUE.md)。
+> **🎯 现在支持 OpenClaw！** 使用 HTTP API 适配器在 OpenClaw 中实现小红书自动化。详见 [OpenClaw 快速开始](QUICKSTART_OPENCRAW.md)。
 
-A powerful Claude Code Skill plugin for automating content publishing to Xiaohongshu (Little Red Book) via the [xiaohongshu-mcp](https://github.com/xpzouying/xiaohongshu-mcp) server.
+A powerful plugin for automating content publishing to Xiaohongshu (Little Red Book) via the [xiaohongshu-mcp](https://github.com/xpzouying/xiaohongshu-mcp) server.
 
 ## Features
 
@@ -47,7 +47,35 @@ OpenClaw's Skill system uses simple function calls and cannot maintain SSE conne
 
 **Solution**: Use Cursor, Claude Code, or other MCP-compatible clients instead.
 
-## Quick Start (Recommended Clients)
+## Quick Start
+
+### For OpenClaw Users (NEW!)
+
+> **✨ 现在支持 OpenClaw！** 通过 HTTP API 适配器实现小红书自动化
+
+**三步快速开始：**
+
+1. **启动 xiaohongshu-mcp**:
+   ```bash
+   cd /path/to/xiaohongshu-mcp && npm start
+   ```
+
+2. **安装适配器**:
+   ```bash
+   ./install-adapter.sh
+   ```
+
+3. **重启 OpenClaw 并开始使用**:
+   ```
+   /check-login      # 检查登录状态
+   /publish "标题" "内容" ["/path/img.jpg"] ["标签"]
+   ```
+
+📖 **完整指南**: [OpenClaw 使用指南](OPENCRAW_GUIDE.md) | [快速开始](QUICKSTART_OPENCRAW.md)
+
+---
+
+### For Standard MCP Clients
 
 ### Using Cursor (Recommended)
 
