@@ -1,8 +1,20 @@
 // 小红书自动发稿 OpenClaw Skill
-// 通过 HTTP JSON-RPC 2.0 调用本地运行的 xiaohongshu-mcp 服务
+// 通过完整的 MCP 客户端协议调用本地运行的 xiaohongshu-mcp 服务
 
 const MCP_SERVER = process.env.XIAOHONGSHU_MCP_URL || 'http://127.0.0.1:18060/mcp';
 const JSON_RPC_VERSION = '2.0';
+
+// MCP 客户端状态
+let mcpSession = {
+  initialized: false,
+  sessionId: null,
+  capabilities: null,
+  tools: [],
+  lastPing: 0
+};
+
+// 请求 ID 计数器
+let requestId = 0;
 
 // MCP 工具名称映射
 const TOOLS = {
@@ -334,17 +346,20 @@ const TOOL_DEFINITIONS = {
   }
 };
 
-// HTTP JSON-RPC 调用
-async function callMcpServer(toolName, params = {}) {
+// ========== MCP 客户端实现 ==========
+
+/**
+ * 发送 JSON-RPC 请求到 MCP 服务器
+ */
+async function sendMcpRequest(method, params = {}) {
   const request = {
     jsonrpc: JSON_RPC_VERSION,
-    id: Date.now(),
-    method: 'tools/call',
-    params: {
-      name: toolName,
-      arguments: params
-    }
+    id: ++requestId,
+    method,
+    params
   };
+
+  console.log(`[MCP Client] 发送请求: ${method}`, JSON.stringify(params).slice(0, 200));
 
   try {
     const response = await fetch(MCP_SERVER, {
@@ -365,46 +380,260 @@ async function callMcpServer(toolName, params = {}) {
       throw new Error(`MCP Error: ${data.error.message} (code: ${data.error.code})`);
     }
 
+    console.log(`[MCP Client] 响应成功: ${method}`);
+    return data.result;
+  } catch (error) {
+    console.error(`[MCP Client] 请求失败: ${method}`, error.message);
+    throw error;
+  }
+}
+
+/**
+ * 发送 MCP 通知（无响应的请求）
+ */
+async function sendMcpNotification(method, params = {}) {
+  const request = {
+    jsonrpc: JSON_RPC_VERSION,
+    // 注意：通知没有 id 字段
+    method,
+    params
+  };
+
+  console.log(`[MCP Client] 发送通知: ${method}`);
+
+  try {
+    const response = await fetch(MCP_SERVER, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(request)
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    // 通知不期待响应
+    console.log(`[MCP Client] 通知发送成功: ${method}`);
+    return true;
+  } catch (error) {
+    console.error(`[MCP Client] 通知发送失败: ${method}`, error.message);
+    throw error;
+  }
+}
+
+/**
+ * 初始化 MCP 会话
+ */
+async function initializeMcpSession() {
+  if (mcpSession.initialized) {
+    console.log('[MCP Client] 会话已初始化，跳过');
+    return true;
+  }
+
+  console.log('[MCP Client] 正在初始化 MCP 会话...');
+
+  try {
+    // 步骤 1: initialize 请求
+    const initResult = await sendMcpRequest('initialize', {
+      protocolVersion: '2024-11-05',
+      capabilities: {},
+      clientInfo: {
+        name: 'xiaohongshu-openclaw-skill',
+        version: '1.0.0'
+      }
+    });
+
+    mcpSession.sessionId = initResult?.sessionId || `session_${Date.now()}`;
+    mcpSession.capabilities = initResult?.capabilities || {};
+
+    console.log('[MCP Client] initialize 响应成功');
+    console.log('[MCP Client] 会话 ID:', mcpSession.sessionId);
+
+    // 步骤 2: 发送 initialized 通知（必需！）
+    await sendMcpNotification('initialized', {});
+
+    // 现在会话才完全初始化
+    mcpSession.initialized = true;
+
+    console.log('[MCP Client] ✅ MCP 会话初始化成功');
+    console.log('[MCP Client] 服务器能力:', JSON.stringify(mcpSession.capabilities));
+
+    return true;
+  } catch (error) {
+    console.error('[MCP Client] ❌ MCP 会话初始化失败:', error.message);
+    mcpSession.initialized = false;
+    throw new Error(`MCP 会话初始化失败: ${error.message}`);
+  }
+}
+
+/**
+ * 获取 MCP 服务器提供的工具列表
+ */
+async function getMcpTools() {
+  console.log('[MCP Client] 正在获取工具列表...');
+
+  try {
+    const result = await sendMcpRequest('tools/list', {});
+    mcpSession.tools = result?.tools || [];
+
+    console.log(`[MCP Client] ✅ 成功获取 ${mcpSession.tools.length} 个工具:`);
+    mcpSession.tools.forEach(tool => {
+      console.log(`  - ${tool.name}: ${tool.description?.slice(0, 60)}...`);
+    });
+
+    return mcpSession.tools;
+  } catch (error) {
+    console.error('[MCP Client] ❌ 获取工具列表失败:', error.message);
+    throw error;
+  }
+}
+
+/**
+ * 调用 MCP 工具
+ */
+async function callMcpTool(toolName, args = {}) {
+  console.log(`[MCP Client] 正在调用工具: ${toolName}`);
+
+  // 确保会话已初始化
+  if (!mcpSession.initialized) {
+    console.log('[MCP Client] 会话未初始化，正在初始化...');
+    await initializeMcpSession();
+    await getMcpTools();
+  }
+
+  try {
+    const result = await sendMcpRequest('tools/call', {
+      name: toolName,
+      arguments: args
+    });
+
     // 解析返回的内容
-    if (data.result && data.result.content && data.result.content[0]) {
-      const text = data.result.content[0].text;
-      try {
-        return JSON.parse(text);
-      } catch {
-        return { raw: text };
+    if (result?.content && result.content[0]) {
+      const content = result.content[0];
+      if (content.type === 'text') {
+        try {
+          const parsed = JSON.parse(content.text);
+          console.log(`[MCP Client] ✅ 工具调用成功: ${toolName}`);
+          return parsed;
+        } catch {
+          // 无法解析为 JSON，返回原始文本
+          console.log(`[MCP Client] ✅ 工具调用成功 (返回文本): ${toolName}`);
+          return { raw: content.text };
+        }
+      } else if (content.type === 'image') {
+        console.log(`[MCP Client] ✅ 工具调用成功 (返回图像): ${toolName}`);
+        return { image: content.data };
       }
     }
 
-    return data.result;
+    console.log(`[MCP Client] ✅ 工具调用成功: ${toolName}`);
+    return result;
   } catch (error) {
-    if (error.name === 'AbortError') {
-      throw new Error(`MCP 服务无响应，请确认服务是否运行在 ${MCP_SERVER}`);
-    }
-    throw new Error(`MCP 服务调用失败: ${error.message}`);
+    console.error(`[MCP Client] ❌ 工具调用失败: ${toolName}`, error.message);
+    throw error;
   }
+}
+
+/**
+ * Ping MCP 服务器，保持连接活跃
+ */
+async function pingMcpServer() {
+  try {
+    await sendMcpRequest('ping', {});
+    mcpSession.lastPing = Date.now();
+    console.log('[MCP Client] ✅ Ping 成功');
+    return true;
+  } catch (error) {
+    console.error('[MCP Client] ❌ Ping 失败:', error.message);
+    // Ping 失败时标记会话为未初始化，下次会重新初始化
+    mcpSession.initialized = false;
+    throw error;
+  }
+}
+
+// ========== OpenClaw Skill 接口 ==========
+
+/**
+ * HTTP JSON-RPC 调用 (兼容旧接口，内部使用新的 MCP 客户端)
+ */
+async function callMcpServer(toolName, params = {}) {
+  return await callMcpTool(toolName, params);
 }
 
 // OpenClaw Skill 入口
 export default {
+  /**
+   * Skill 加载时的初始化
+   */
+  async onLoad() {
+    console.log('[OpenClaw Skill] 小红书 Skill 正在加载...');
+    console.log(`[OpenClaw Skill] MCP 服务器地址: ${MCP_SERVER}`);
+
+    try {
+      // 尝试初始化 MCP 会话
+      await initializeMcpSession();
+      await getMcpTools();
+      console.log('[OpenClaw Skill] ✅ 小红书 Skill 加载成功');
+    } catch (error) {
+      console.error('[OpenClaw Skill] ⚠️ 初始化失败，将在首次调用时重试:', error.message);
+      // 不抛出错误，允许 Skill 加载，在首次调用时重试
+    }
+  },
+
+  /**
+   * 返回工具定义
+   */
   async tools() {
+    // 如果已连接到 MCP 服务器，优先使用服务器的工具定义
+    if (mcpSession.initialized && mcpSession.tools.length > 0) {
+      console.log(`[OpenClaw Skill] 返回 MCP 服务器的 ${mcpSession.tools.length} 个工具`);
+      return mcpSession.tools.map(tool => ({
+        name: tool.name,
+        description: tool.description,
+        inputSchema: tool.inputSchema
+      }));
+    }
+
+    // 否则返回本地定义的工具
+    console.log('[OpenClaw Skill] 返回本地定义的工具');
     return Object.entries(TOOL_DEFINITIONS).map(([toolName, definition]) => ({
       name: toolName,
       ...definition
     }));
   },
 
+  /**
+   * 调用工具
+   */
   async call(toolName, params = {}) {
+    console.log(`[OpenClaw Skill] 调用工具: ${toolName}`);
+    console.log(`[OpenClaw Skill] 参数:`, JSON.stringify(params).slice(0, 200));
+
     try {
       const result = await callMcpServer(toolName, params);
+      console.log(`[OpenClaw Skill] ✅ 工具调用成功: ${toolName}`);
       return {
         success: true,
         data: result
       };
     } catch (error) {
+      console.error(`[OpenClaw Skill] ❌ 工具调用失败: ${toolName}`, error.message);
       return {
         success: false,
         error: error.message
       };
     }
+  },
+
+  /**
+   * Skill 卸载时的清理
+   */
+  async onUnload() {
+    console.log('[OpenClaw Skill] 小红书 Skill 正在卸载...');
+    mcpSession.initialized = false;
+    mcpSession.tools = [];
+    console.log('[OpenClaw Skill] ✅ 清理完成');
   }
 };

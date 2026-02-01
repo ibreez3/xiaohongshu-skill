@@ -45,6 +45,68 @@ This Skill depends on the xiaohongshu-mcp server for all operations. Special tha
 
 ## Installation
 
+### For OpenClaw
+
+#### Quick Install (Recommended)
+
+Run the installation script:
+
+```bash
+./install.sh
+```
+
+The script will:
+- Check if OpenClaw is installed
+- Verify xiaohongshu-mcp server status
+- Copy files to OpenClaw skills directory
+- Set proper permissions
+- Verify the installation
+
+Then:
+
+1. Start xiaohongshu-mcp server (if not running):
+   ```bash
+   cd /path/to/xiaohongshu-mcp
+   npm start
+   ```
+
+2. Restart OpenClaw:
+   ```bash
+   openclaw restart
+   # or completely quit and reopen OpenClaw
+   ```
+
+3. Test the installation:
+   ```bash
+   node test-mcp-client.js
+   ```
+
+#### Manual Install
+
+```bash
+# Create installation directory
+mkdir -p ~/.openclaw/skills/xiaohongshu-auto-publish
+
+# Copy files
+cp index.js ~/.openclaw/skills/xiaohongshu-auto-publish/
+cp openclaw.plugin.json ~/.openclaw/skills/xiaohongshu-auto-publish/
+cp -r commands ~/.openclaw/skills/xiaohongshu-auto-publish/
+cp -r skills ~/.openclaw/skills/xiaohongshu-auto-publish/
+
+# Set permissions
+chmod +x ~/.openclaw/skills/xiaohongshu-auto-publish/index.js
+```
+
+For detailed installation instructions, see [INSTALL.md](INSTALL.md).
+
+### Uninstall
+
+```bash
+./uninstall.sh
+```
+
+### For Claude Code
+
 1. Clone this repository:
    ```bash
    git clone https://github.com/yourusername/xiaohongshu-skill.git
@@ -146,6 +208,57 @@ The MCP server URL defaults to `http://127.0.0.1:18060/mcp`. To change it, set t
 ```bash
 export XIAOHONGSHU_MCP_URL="http://your-server:port/mcp"
 ```
+
+## Architecture
+
+This Skill implements a **complete MCP (Model Context Protocol) client** that:
+
+1. **Session Management**: Initializes and maintains MCP session with the server
+2. **Tool Discovery**: Automatically fetches available tools from the MCP server
+3. **Protocol Compliance**: Follows the MCP 2024-11-05 specification
+4. **Error Handling**: Gracefully handles connection failures and retries
+
+### MCP Protocol Flow
+
+```
+OpenClaw Skill          MCP Client              xiaohongshu-mcp
+     │                      │                        │
+     │  tools()             │                        │
+     ├─────────────────────>│                        │
+     │                      │  initialize            │
+     │                      ├───────────────────────>│
+     │                      │  ← session info        │
+     │                      │<───────────────────────┤
+     │                      │                        │
+     │                      │  tools/list            │
+     │                      ├───────────────────────>│
+     │                      │  ← tool definitions    │
+     │                      │<───────────────────────┤
+     │  ← tool definitions  │                        │
+     │<─────────────────────┤                        │
+     │                      │                        │
+     │  call(tool, params)  │                        │
+     ├─────────────────────>│                        │
+     │                      │  tools/call            │
+     │                      ├───────────────────────>│
+     │                      │  ← result              │
+     │  ← result            │<───────────────────────┤
+     │<─────────────────────┤                        │
+```
+
+### Testing the MCP Client
+
+Run the test script to verify the MCP connection:
+
+```bash
+node test-mcp-client.js
+```
+
+This will:
+1. Initialize an MCP session
+2. Ping the server
+3. Fetch available tools
+4. Call a test tool (check_login_status)
 
 ## API Endpoints Used
 
